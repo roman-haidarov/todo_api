@@ -20,7 +20,7 @@ type TodoItem struct {
 }
 
 type ListsItem struct {
-	Id int
-	ListId int
-	ItemId string
+		Id int
+		ListId int
+		ItemId string
 }
