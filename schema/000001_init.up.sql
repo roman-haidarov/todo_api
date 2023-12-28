@@ -10,7 +10,14 @@ CREATE TABLE todo_lists
 (
     id           serial       not null unique,
     title        varchar(255) not null,
-    descriptions varchar(255)
+    descriptions varchar(255),
+    title_tsv    tsvector GENERATED ALWAYS AS (
+                    to_tsvector('english', title)
+                 ) STORED,
+    tsv          tsvector GENERATED ALWAYS AS (
+                    to_tsvector('english', coalesce(title, '') || ' ' || coalesce(descriptions, ''))
+                 ) STORED,
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE user_lists
@@ -34,3 +41,6 @@ CREATE TABLE lists_items
     item_id int references todo_items(id) on delete cascade not null,
     list_id int references todo_lists(id) on delete cascade not null
 );
+
+CREATE INDEX IF NOT EXISTS idx_todo_lists_tsv ON todo_lists USING gin(tsv);
+CREATE INDEX IF NOT EXISTS idx_todo_lists_title_tsv ON todo_lists USING gin(title_tsv);
