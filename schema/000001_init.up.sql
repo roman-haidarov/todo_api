@@ -10,7 +10,7 @@ CREATE TABLE todo_lists
 (
     id           serial       not null unique,
     title        varchar(255) not null,
-    descriptions varchar(255),
+    descriptions varchar(255) not null,
     title_tsv    tsvector GENERATED ALWAYS AS (
                     to_tsvector('english', title)
                  ) STORED,
