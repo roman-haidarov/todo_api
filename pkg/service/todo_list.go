@@ -33,10 +33,10 @@ func (s *TodoListService) DeleteList(userId, listId int) error {
 		return s.repo.DeleteList(userId, listId)
 }
 
-func (s *TodoListService) UpdateLis(userId, listId int, input todo.UpdateListInput) error {
+func (s *TodoListService) UpdateList(userId, listId int, input todo.UpdateListInput) error {
 		if err := input.Validate(); err != nil {
 				return err
 		}
 
-		return s.repo.UpdateLis(userId, listId, input)
+		return s.repo.UpdateList(userId, listId, input)
 }

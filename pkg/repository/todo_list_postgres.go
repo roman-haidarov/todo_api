@@ -80,7 +80,7 @@ func (r *TodoListPostgres) DeleteList(userId, listId int) error {
 		return err
 }
 
-func (r *TodoListPostgres) UpdateLis(userId, listId int, input todo.UpdateListInput) error {
+func (r *TodoListPostgres) UpdateList(userId, listId int, input todo.UpdateListInput) error {
 		setValues := make([]string, 0)
 		args 			:= make([]interface{}, 0)
 		argId 		:= 1
