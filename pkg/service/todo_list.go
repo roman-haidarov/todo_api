@@ -21,6 +21,10 @@ func (s *TodoListService) GetAll(userId int) ([]todo.TodoList, error) {
 		return s.repo.GetAll(userId)
 }
 
+func (s *TodoListService) GetListsBySearch(search string) ([]todo.TodoList, error) {
+		return s.repo.GetListsBySearch(search)
+}
+
 func (s *TodoListService) GetById(userId, listId int) (todo.TodoList, error) {
 		return s.repo.GetById(userId, listId)
 }

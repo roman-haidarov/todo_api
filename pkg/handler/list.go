@@ -75,6 +75,28 @@ func (h *Handler) getListById(c *gin.Context) {
 		c.JSON(http.StatusOK, list)
 }
 
+type SearchInput struct {
+		Search string `json:"search" binding:"required"`
+}
+
+func (h *Handler) getListsBySearch(c *gin.Context) {
+	var search SearchInput
+	if err := c.BindJSON(&search); err != nil {
+			newErrorResponse(c, http.StatusBadRequest, err.Error())
+			return
+	}
+
+	lists, err := h.services.TodoList.GetListsBySearch(search.Search)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, getAllListsResponse{
+			Data: lists,
+	})
+}
+
 func (h *Handler) updateList(c *gin.Context) {
 		
 }

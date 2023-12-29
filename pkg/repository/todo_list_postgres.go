@@ -47,6 +47,14 @@ func (r *TodoListPostgres) GetAll(userId int) ([]todo.TodoList, error) {
 		return lists, err
 }
 
+func (r *TodoListPostgres) GetListsBySearch(serach string) ([]todo.TodoList, error) {
+		var lists []todo.TodoList
+		query := fmt.Sprintf("SELECT id, title, descriptions FROM %s WHERE tsv @@ to_tsquery($1)", todoListsTable)
+		err := r.db.Select(&lists, query, serach)
+		
+		return lists, err
+}
+
 func (r *TodoListPostgres) GetById(userId, listId int) (todo.TodoList, error) {
 		var list todo.TodoList
 		query := fmt.Sprintf(`SELECT tl.id, tl.title, tl.descriptions FROM %s tl

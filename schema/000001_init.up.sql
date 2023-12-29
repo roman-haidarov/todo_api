@@ -11,9 +11,6 @@ CREATE TABLE todo_lists
     id           serial       not null unique,
     title        varchar(255) not null,
     descriptions varchar(255) not null,
-    title_tsv    tsvector GENERATED ALWAYS AS (
-                    to_tsvector('english', title)
-                 ) STORED,
     tsv          tsvector GENERATED ALWAYS AS (
                     to_tsvector('english', coalesce(title, '') || ' ' || coalesce(descriptions, ''))
                  ) STORED,
@@ -43,4 +40,3 @@ CREATE TABLE lists_items
 );
 
 CREATE INDEX IF NOT EXISTS idx_todo_lists_tsv ON todo_lists USING gin(tsv);
-CREATE INDEX IF NOT EXISTS idx_todo_lists_title_tsv ON todo_lists USING gin(title_tsv);
