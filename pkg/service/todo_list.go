@@ -21,10 +21,22 @@ func (s *TodoListService) GetAll(userId int) ([]todo.TodoList, error) {
 		return s.repo.GetAll(userId)
 }
 
-func (s *TodoListService) GetListsBySearch(search string) ([]todo.TodoList, error) {
+func (s *TodoListService) GetListsBySearch(search string) ([]todo.TodoListSearch, error) {
 		return s.repo.GetListsBySearch(search)
 }
 
 func (s *TodoListService) GetById(userId, listId int) (todo.TodoList, error) {
 		return s.repo.GetById(userId, listId)
+}
+
+func (s *TodoListService) DeleteList(userId, listId int) error {
+		return s.repo.DeleteList(userId, listId)
+}
+
+func (s *TodoListService) UpdateLis(userId, listId int, input todo.UpdateListInput) error {
+		if err := input.Validate(); err != nil {
+				return err
+		}
+
+		return s.repo.UpdateLis(userId, listId, input)
 }

@@ -3,6 +3,10 @@ CREATE TABLE users
     id            serial       not null unique,
     name          varchar(255) not null,
     username      varchar(255) not null,
+    tsv           tsvector GENERATED ALWAYS AS (
+                    to_tsvector('english', coalesce(username, '') || ' ') ||
+                    to_tsvector('russian', coalesce(username, '') || ' ')
+                  ) STORED,
     password_hash varchar(255) not null
 );
 

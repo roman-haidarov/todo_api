@@ -2,8 +2,10 @@ package repository
 
 import (
 	"fmt"
+	"strings"
 	"github.com/jmoiron/sqlx"
 	"github.com/roman-haidarov/todo-app"
+	"github.com/sirupsen/logrus"
 )
 
 type TodoListPostgres struct {
@@ -47,11 +49,16 @@ func (r *TodoListPostgres) GetAll(userId int) ([]todo.TodoList, error) {
 		return lists, err
 }
 
-func (r *TodoListPostgres) GetListsBySearch(serach string) ([]todo.TodoList, error) {
-		var lists []todo.TodoList
-		query := fmt.Sprintf("SELECT id, title, descriptions FROM %s WHERE tsv @@ to_tsquery($1)", todoListsTable)
-		err := r.db.Select(&lists, query, serach)
-		
+func (r *TodoListPostgres) GetListsBySearch(search string) ([]todo.TodoListSearch, error) {
+		var lists []todo.TodoListSearch
+
+		query := fmt.Sprintf(`SELECT u.username, tl.title FROM %s tl
+													INNER JOIN %s ul on tl.id = ul.list_id
+													INNER JOIN %s u on ul.user_id = u.id
+													WHERE u.tsv @@ to_tsquery($1) OR tl.tsv @@ to_tsquery($1)`,
+		todoListsTable, userListsTable, usersTable)
+		err := r.db.Select(&lists, query, search)
+
 		return lists, err
 }
 
@@ -63,4 +70,41 @@ func (r *TodoListPostgres) GetById(userId, listId int) (todo.TodoList, error) {
 		err := r.db.Get(&list, query, userId, listId)
 
 		return list, err
+}
+
+func (r *TodoListPostgres) DeleteList(userId, listId int) error {
+		query := fmt.Sprintf("DELETE FROM %s tl USING %s ul WHERE tl.id = ul.list_id AND ul.user_id = $1 AND ul.list_id = $2",
+				todoListsTable, userListsTable)
+		_, err := r.db.Exec(query, userId, listId)
+
+		return err
+}
+
+func (r *TodoListPostgres) UpdateLis(userId, listId int, input todo.UpdateListInput) error {
+		setValues := make([]string, 0)
+		args 			:= make([]interface{}, 0)
+		argId 		:= 1
+
+		if input.Title != nil {
+				setValues = append(setValues, fmt.Sprintf("title=$%d", argId))
+				args 			= append(args, *input.Title)
+				argId++
+		}
+
+		if input.Descriptions != nil {
+				setValues = append(setValues, fmt.Sprintf("descriptions=$%d", argId))
+				args 			= append(args, *input.Descriptions)
+				argId++
+		}
+
+		setQuery := strings.Join(setValues, ", ")
+		query    := fmt.Sprintf("UPDATE %s tl SET %s FROM %s ul WHERE tl.id = ul.list_id AND ul.list_id=$%d AND ul.user_id=$%d",
+														todoListsTable, setQuery, userListsTable, argId, argId+1)
+		args = append(args, listId, userId)
+
+		logrus.Debugf("udateQuery: %s", query)
+		logrus.Debugf("args: %s", args)
+
+		_, err := r.db.Exec(query, args...)
+		return err
 }
