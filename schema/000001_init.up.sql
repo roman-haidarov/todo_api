@@ -44,3 +44,4 @@ CREATE TABLE lists_items
 );
 
 CREATE INDEX IF NOT EXISTS idx_todo_lists_tsv ON todo_lists USING gin(tsv);
+CREATE INDEX IF NOT EXISTS idx_users_tsv ON users USING gin(tsv);
