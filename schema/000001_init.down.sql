@@ -11,3 +11,5 @@ DROP TABLE todo_items;
 DROP INDEX IF EXISTS idx_users_tsv;
 
 DROP INDEX IF EXISTS idx_todo_lists_tsv;
+
+DROP INDEX IF EXISTS idx_todo_items_tsv;
