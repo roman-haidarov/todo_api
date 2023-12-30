@@ -20,10 +20,15 @@ type UserList struct {
 }
 
 type TodoItem struct {
-		Id 					 int 		`json:"-"`
-		Title 			 string `json:"title"`
-		Descriptions string	`json:"descriptions"`
-		Done 				 bool		`json:"done"`
+		ID           int    `json:"-" db:"id"`
+		Title        string `json:"title" db:"title" binding:"required"`
+		Descriptions string `json:"descriptions" db:"descriptions"`
+		Done         bool   `json:"done" db:"done"`
+}
+
+type TodoItemSearch struct {
+    Username string    `db:"username"`
+    Done     bool 		 `db:"done"`
 }
 
 type ListsItem struct {

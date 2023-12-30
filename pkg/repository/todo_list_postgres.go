@@ -42,7 +42,7 @@ func (r *TodoListPostgres) Create(userId int, list todo.TodoList) (int, error) {
 
 func (r *TodoListPostgres) GetAll(userId int) ([]todo.TodoList, error) {
 		var lists []todo.TodoList
-		query := fmt.Sprintf("SELECT tl.id, tl.title, tl.descriptions FROM %s tl INNER JOIN %s ul on tl.id = ul.list_id WHERE ul.user_id = $1",
+		query := fmt.Sprintf("SELECT tl.id, tl.title, tl.descriptions FROM %s tl INNER JOIN %s ul on tl.id = ul.list_id WHERE ul.user_id = $1 ORDER BY tl.id DESC",
 				todoListsTable, userListsTable)
 		err := r.db.Select(&lists, query, userId)
 
@@ -55,11 +55,27 @@ func (r *TodoListPostgres) GetListsBySearch(search string) ([]todo.TodoListSearc
 		query := fmt.Sprintf(`SELECT u.username, tl.title FROM %s tl
 													INNER JOIN %s ul on tl.id = ul.list_id
 													INNER JOIN %s u on ul.user_id = u.id
-													WHERE u.tsv @@ to_tsquery($1) OR tl.tsv @@ to_tsquery($1)`,
+													WHERE u.tsv @@ to_tsquery($1) OR tl.tsv @@ to_tsquery($1)
+													ORDER BY tl.id DESC`,
 		todoListsTable, userListsTable, usersTable)
 		err := r.db.Select(&lists, query, search)
 
 		return lists, err
+}
+
+func (r *TodoListPostgres) GetItemsBySearch(search string) ([]todo.TodoItemSearch, error) {
+		var items []todo.TodoItemSearch
+
+    query := fmt.Sprintf(`SELECT u.username, ti.done FROM %s ti
+													INNER JOIN %s ui ON ti.id = ui.item_id
+													INNER JOIN %s u ON ui.user_id = u.id
+													WHERE u.tsv @@ to_tsquery($1) OR ti.tsv @@ to_tsquery($1)
+													ORDER BY u.username DESC`,
+													todoItemsTable, userItemsTable, usersTable)
+
+		err := r.db.Select(&items, query, search)
+
+		return items, err
 }
 
 func (r *TodoListPostgres) GetById(userId, listId int) (todo.TodoList, error) {
