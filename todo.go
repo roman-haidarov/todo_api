@@ -26,6 +26,11 @@ type TodoItem struct {
 		Done         bool   `json:"done" db:"done"`
 }
 
+type TodoItemSearch struct {
+    Username string    `db:"username"`
+    Done     bool 		 `db:"done"`
+}
+
 type ListsItem struct {
 		Id 		 int
 		ListId int

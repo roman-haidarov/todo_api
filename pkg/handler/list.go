@@ -36,20 +36,20 @@ type getAllListsResponse struct {
 }
 
 type getSearchListsResponse struct {
-	Data []todo.TodoListSearch `json:"data"`
+		Data []todo.TodoListSearch `json:"data"`
 }
 
 func (h *Handler) getAllLists(c *gin.Context) {
 		userId, err := getUserId(c)
 		if err != nil {
-			newErrorResponse(c, http.StatusInternalServerError, err.Error())
-			return
+				newErrorResponse(c, http.StatusInternalServerError, err.Error())
+				return
 		}
 
 		lists, err := h.services.TodoList.GetAll(userId)
 		if err != nil {
-			newErrorResponse(c, http.StatusInternalServerError, err.Error())
-			return
+				newErrorResponse(c, http.StatusInternalServerError, err.Error())
+				return
 		}
 
 		c.JSON(http.StatusOK, getAllListsResponse{
@@ -78,12 +78,12 @@ func (h *Handler) getListById(c *gin.Context) {
 		c.JSON(http.StatusOK, list)
 }
 
-type SearchInput struct {
+type SearchInputList struct {
 		Search string `json:"search" binding:"required"`
 }
 
 func (h *Handler) getListsBySearch(c *gin.Context) {
-		var search SearchInput
+		var search SearchInputList
 		if err := c.BindJSON(&search); err != nil {
 				newErrorResponse(c, http.StatusBadRequest, err.Error())
 				return
@@ -91,8 +91,8 @@ func (h *Handler) getListsBySearch(c *gin.Context) {
 
 		lists, err := h.services.TodoList.GetListsBySearch(search.Search)
 		if err != nil {
-			newErrorResponse(c, http.StatusInternalServerError, err.Error())
-			return
+				newErrorResponse(c, http.StatusInternalServerError, err.Error())
+				return
 		}
 
 		c.JSON(http.StatusOK, getSearchListsResponse{
