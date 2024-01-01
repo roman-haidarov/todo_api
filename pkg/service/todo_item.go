@@ -25,5 +25,21 @@ func (s *TodoItemService) Create(userId, listId int, item todo.TodoItem) (int, e
 }
 
 func (s *TodoItemService) GetAll(userId, listId int) ([]todo.TodoItem, error) {
-	return s.repo.GetAll(userId, listId)
+		return s.repo.GetAll(userId, listId)
+}
+
+func (s *TodoItemService) GetItemById(userId, itemId int) (todo.TodoItem, error) {
+		return s.repo.GetItemById(userId, itemId)
+}
+
+func (s *TodoItemService) DeleteItem(userId, itemId int) error {
+		return s.repo.DeleteItem(userId, itemId)
+}
+
+func (s *TodoItemService) UpdateItem(userId, itemId int, input todo.UpdateItemInput) error {
+		if err := input.Validate(); err != nil {
+				return err
+		}
+
+		return s.repo.UpdateItem(userId, itemId, input)
 }

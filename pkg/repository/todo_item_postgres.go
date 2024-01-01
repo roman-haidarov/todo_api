@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"strings"
 	"github.com/jmoiron/sqlx"
 	"github.com/roman-haidarov/todo-app"
 )
@@ -60,4 +61,58 @@ func (r *TodoItemPostgres) GetAll(userId, listId int) ([]todo.TodoItem, error) {
 		err := r.db.Select(&items, query, listId, userId)
 
 		return items, err
+}
+
+func (r *TodoItemPostgres) GetItemById(userId, itemId int) (todo.TodoItem, error) {
+		var item todo.TodoItem
+		query := fmt.Sprintf(`SELECT ti.id, ti.title, ti.descriptions FROM %s ti
+													INNER JOIN %s ui on ti.id = ui.item_id WHERE ui.user_id = $1 AND ui.item_id = $2`,
+				todoItemsTable, userItemsTable)
+		err := r.db.Get(&item, query, userId, itemId)
+
+		return item, err
+}
+
+func (r *TodoItemPostgres) DeleteItem(userId, itemId int) error {
+		query := fmt.Sprintf(`DELETE FROM %s ti USING %s li, %s ul, %s ui
+													WHERE ti.id = li.item_id AND li.list_id = ul.list_id AND ul.user_id = $1
+													AND ui.item_id = ti.id AND ui.user_id = $1 AND ti.id = $2`,
+				todoItemsTable, listsItemsTable, userListsTable, userItemsTable)
+
+		_, err := r.db.Exec(query, userId, itemId)
+
+		return err
+}
+
+func (r *TodoItemPostgres) UpdateItem(userId, itemId int, input todo.UpdateItemInput) error {
+		setValues := make([]string, 0)
+		args 			:= make([]interface{}, 0)
+		argId 		:= 1
+
+		if input.Title != nil {
+				setValues = append(setValues, fmt.Sprintf("title=$%d", argId))
+				args 			= append(args, *input.Title)
+				argId++
+		}
+
+		if input.Descriptions != nil {
+				setValues = append(setValues, fmt.Sprintf("descriptions=$%d", argId))
+				args 			= append(args, *input.Descriptions)
+				argId++
+		}
+
+
+		if input.Done != nil {
+				setValues = append(setValues, fmt.Sprintf("done=$%d", argId))
+				args 			= append(args, *input.Done)
+				argId++
+		}
+
+		setQuery := strings.Join(setValues, ", ")
+		query    := fmt.Sprintf(`UPDATE %s ti SET %s FROM %s li, %s ul
+														 WHERE ti.id = li.item_id AND li.list_id=ul.list_id AND ul.user_id=$%d AND ti.id=$%d`,
+														todoItemsTable, setQuery, listsItemsTable, userListsTable, argId, argId+1)
+		args = append(args, userId, itemId)
+		_, err := r.db.Exec(query, args...)
+		return err
 }
